@@ -27,4 +27,11 @@ excel_path <- "pool3_responseratios.xlsx"
 # List sheets to verify names
 # These are the tabs in the xlsx file Eddie gave me
 sheets <- excel_sheets(excel_path)
-print(sheets)
+print(sheets) # (If names are slightly different, note thhat to adapt the code.)
+
+# Read the main sheet with raw signals and pairings
+raw_pairs <- read_excel(excel_path, sheet = "reorder clean pair")
+
+# Quick look at structure
+glimpse(raw_pairs)
+head(raw_pairs)

@@ -9,3 +9,12 @@
 - Data files:
   - `pool3_responseratios.xlsx`: contains raw signals, RR results, etc.
   - `MIT research .pdf`: meeting notes with Eddie explaining self vs non-self normalization
+
+## Data import
+
+- Used `excel_sheets()` to list sheet names in `pool3_responseratios.xlsx`
+- Confirmed that the main raw signal sheet is named `"reorder clean pair"`
+- Loaded it as `raw_pairs` using `read_excel()`
+- `glimpse(raw_pairs)` shows:
+  - First column: `<whatever the name is>`
+  - Remaining columns: metabolite and internal standard peak areas
