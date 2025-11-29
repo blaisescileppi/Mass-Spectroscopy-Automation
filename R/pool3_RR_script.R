@@ -35,3 +35,20 @@ raw_pairs <- read_excel(excel_path, sheet = "reorder clean pair")
 # Quick look at structure
 glimpse(raw_pairs)
 head(raw_pairs)
+
+# ----------------------------
+# 4. Reshape to a long-ways format
+# ----------------------------
+
+# Change this to the actual name of your sample ID column (from glimpse)
+sample_col <- "Filename"
+
+long_signals <- raw_pairs %>%
+  pivot_longer(
+    cols = -all_of(sample_col),
+    names_to = "metabolite",
+    values_to = "signal"
+  )
+
+# Inspect the reshaped data
+head(long_signals)

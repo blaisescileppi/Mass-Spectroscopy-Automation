@@ -18,3 +18,12 @@
 - `glimpse(raw_pairs)` shows:
   - First column: `<whatever the name is>`
   - Remaining columns: metabolite and internal standard peak areas
+
+## Reshape to long format
+
+- Used `pivot_longer()` to convert `raw_pairs` from wide (1 row per sample, many metabolite columns)
+  to long (`long_signals`):
+  - Columns: `Filename` (sample ID), `metabolite`, `signal`
+- This structure will make it easier to:
+  - Attach metadata about each metabolite (internal standard, self vs non-self)
+  - Join the internal standard signal for each (sample, metabolite)
