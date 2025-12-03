@@ -1,0 +1,15 @@
+metabolite,internal_standard,norm_type
+creatinine,creatinine-D3,self
+3-hydroxybutyrate,lactate-13C9,non-self
+hypoxanthine,hypoxanthine-13C5,self
+acetylcarnitine,valine-13C5,non-self
+acetylglutamine_external,proline-13C5,non-self
+acetylglutamine,acetylglutamine-13C7,self
+glycerate,asparagine-13C4...15,non-self
+allantoin,glutamine-13C5...17,non-self
+sorbitol,glutamine-13C5...19,non-self
+phosphocholine_external,asparagine-13C4...21,non-self
+acetylaspartate,asparagine-13C4...23,non-self
+phosphocholine,phosphocholine-13C5,self
+myo-inositol,taurine-13C2,non-self
+gssg,gssg-13C20,self
