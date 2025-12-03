@@ -1,0 +1,120 @@
+---
+title: "Pool 3 Response Ratio Analysis"
+author: "Blaise"
+output: html_document
+---
+
+# 1. Project overview
+
+This document explains the workflow for automating response ratio (RR) calculations
+for the Pool 3 mass spec dataset (`pool3_responseratios.xlsx`).
+
+The goals are:
+- Import the raw signal data from the "reorder clean pair" sheet
+- Define metabolite ↔ internal standard mappings (self vs non-self)
+- Compute response ratios: RR = metabolite_signal / IS_signal
+- Export RR tables matching the Excel output ("RR Results", "RR self", "RR non-self")
+
+# 2. Setup
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = TRUE, warning = TRUE)
+
+library(readxl)
+library(dplyr)
+library(tidyr)
+library(readr)
+library(writexl)
+
+excel_path   <- "pool3_responseratios.xlsx"
+mapping_path <- "metabolite_map.csv"
+```
+# 3. Inspect workbook and raw data
+excel_sheets(excel_path)
+
+raw_pairs <- read_excel(excel_path, sheet = "reorder clean pair")
+glimpse(raw_pairs)
+head(raw_pairs)
+
+# 4. Reshape to long format and convert to numeric
+sample_col <- "Filename"
+
+long_signals <- raw_pairs %>%
+pivot_longer(
+cols = -all_of(sample_col),
+names_to = "metabolite",
+values_to = "signal"
+) %>%
+mutate(signal = as.numeric(signal))
+
+head(long_signals)
+
+# 5. Metabolite ↔ internal standard mapping
+metabolite_map <- read_csv(mapping_path, show_col_types = FALSE)
+metabolite_map
+
+data_mets <- sort(unique(long_signals$metabolite))
+unmapped  <- setdiff(data_mets, metabolite_map$metabolite)
+unmapped
+
+# 6. Compute Response ratios
+rr_long <- long_signals %>%
+left_join(metabolite_map, by = "metabolite") %>%
+left_join(
+long_signals,
+by = c("Filename" = "Filename",
+"internal_standard" = "metabolite"),
+suffix = c("", "_IS")
+) %>%
+mutate(
+response_ratio = signal / signal_IS
+)
+
+head(rr_long)
+
+# 7. Create and export the output tables
+rr_long_clean <- rr_long %>%
+filter(!is.na(response_ratio),
+!is.na(internal_standard),
+!is.na(signal_IS)) %>%
+distinct(Filename, metabolite, .keep_all = TRUE)
+
+rr_all_wide <- rr_long_clean %>%
+select(Filename, metabolite, response_ratio) %>%
+pivot_wider(
+names_from  = metabolite,
+values_from = response_ratio
+)
+
+rr_self_wide <- rr_long_clean %>%
+filter(norm_type == "self") %>%
+select(Filename, metabolite, response_ratio) %>%
+pivot_wider(
+names_from  = metabolite,
+values_from = response_ratio
+)
+
+rr_nonself_wide <- rr_long_clean %>%
+filter(norm_type == "non-self") %>%
+select(Filename, metabolite, response_ratio) %>%
+pivot_wider(
+names_from  = metabolite,
+values_from = response_ratio
+)
+
+output_file <- "pool3_RR_output_from_Rmd.xlsx"
+
+write_xlsx(
+list(
+"RR_all"      = rr_all_wide,
+"RR_self"     = rr_self_wide,
+"RR_non_self" = rr_nonself_wide
+),
+path = output_file
+)
+
+list(
+RR_all    = head(rr_all_wide),
+RR_self   = head(rr_self_wide),
+RR_nonself = head(rr_nonself_wide)
+)
