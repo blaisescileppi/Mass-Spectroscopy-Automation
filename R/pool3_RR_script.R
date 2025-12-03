@@ -134,3 +134,59 @@ rr_long <- rr_long %>%
 
 # 6.3 Inspect a few rows
 head(rr_long)
+
+# ----------------------------
+# 7. Create RR output tables (wide format)
+# ----------------------------
+
+# 7.0 Keep only rows where we have a valid RR
+rr_long_clean <- rr_long %>%
+  filter(!is.na(response_ratio),
+         !is.na(internal_standard),
+         !is.na(signal_IS)) %>%
+  distinct(Filename, metabolite, .keep_all = TRUE)
+
+# 7.1 All metabolites (like "RR Results" tab)
+rr_all_wide <- rr_long_clean %>%
+  select(Filename, metabolite, response_ratio) %>%
+  tidyr::pivot_wider(
+    names_from  = metabolite,
+    values_from = response_ratio
+  )
+
+# 7.2 Self-normalized metabolites only
+rr_self_wide <- rr_long_clean %>%
+  filter(norm_type == "self") %>%
+  select(Filename, metabolite, response_ratio) %>%
+  tidyr::pivot_wider(
+    names_from  = metabolite,
+    values_from = response_ratio
+  )
+
+# 7.3 Non-self-normalized metabolites only
+rr_nonself_wide <- rr_long_clean %>%
+  filter(norm_type == "non-self") %>%
+  select(Filename, metabolite, response_ratio) %>%
+  tidyr::pivot_wider(
+    names_from  = metabolite,
+    values_from = response_ratio
+  )
+
+# Quick sanity checks
+head(rr_all_wide)
+head(rr_self_wide)
+head(rr_nonself_wide)
+
+# 7.4 Write everything to an Excel file
+output_file <- "pool3_RR_output.xlsx"
+
+writexl::write_xlsx(
+  list(
+    "RR_all"      = rr_all_wide,
+    "RR_self"     = rr_self_wide,
+    "RR_non_self" = rr_nonself_wide
+  ),
+  path = output_file
+)
+
+output_file
