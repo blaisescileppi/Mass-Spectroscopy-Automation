@@ -27,7 +27,21 @@ library(tidyr)
 library(readr)
 library(writexl)
 
-excel_path   <- "pool3_responseratios.xlsx"
+raw_dir <- "raw"
+
+# Find all .xlsx files in raw/
+excel_files <- list.files(raw_dir, pattern = "\\.xlsx$", full.names = TRUE)
+
+if (length(excel_files) == 0) {
+  stop("No .xlsx files found in the 'raw' folder. Please drop your raw mass spec file there.")
+}
+
+# Pick the most recently modified .xlsx
+excel_path <- excel_files[which.max(file.mtime(excel_files))]
+
+message("Using raw file: ", excel_path)
+
+# Mapping file stays the same
 mapping_path <- "metabolite_map.csv"
 ```
 
